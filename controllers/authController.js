@@ -26,8 +26,8 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
-
+    const { username, password } = req.body;
+    const email = username
     try {
       const user = await User.findOne({ email });
       if (!user) {
@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
       }
   
       const token = jwt.sign({ userId: user._id, role: user.role },"key", { expiresIn: '1h' });
-      res.json({ token });
+      res.status(200).json({ msg: "login success", token: token });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal server error' });
@@ -57,9 +57,8 @@ exports.logout = async (req, res) => {
       return res.status(400).json({ message: 'Token not provided' });
   }
   try {
-      // Instead of using timestamp as unique, use the token itself
-      await Blacklist.create({ token: token, timestamp: new Date().toISOString() });
-      res.json({ message: 'User logged out successfully' });
+      await Blacklist.create({ token: token, timestamp: new Date().toISOString() });      // DO NOT REMOVE TIMESTAMP, WILL USE IT TO DO HOUSEKEEPING TASK OF DEBLACKLISTING. LESS MEMORY!
+      res.status(200).json({ message: 'logout success' });
   } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal server error' });
@@ -71,7 +70,7 @@ exports.changePassword = async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       await User.findByIdAndUpdate(req.userId, { password: hashedPassword });
-      res.json({ message: 'Password changed successfully' });
+      res.status(200).json({ message: 'Password changed successfully' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Internal server error' });
