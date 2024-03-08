@@ -1,6 +1,6 @@
 // app.js
 const express = require('express');
-
+const cors = require('cors');
 const connectDb = require("./database/config.js")
 // const { connectRedis } = require("./database/redis.js");
 const authRoutes = require('./routes/authRoutes');
@@ -11,6 +11,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 require('dotenv').config()
+app.use(cors(
+  {
+    origin: 'http://localhost:3001',
+    credentials: true
+  }
+));
 connectDb()
 // connectRedis();
 // Login User
